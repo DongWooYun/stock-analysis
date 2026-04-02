@@ -1,0 +1,18 @@
+# Google Drive
+*.gdoc
+*.gsheet
+*.gslides
+*.gdraw
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.ipynb_checkpoints/
+
+# 임시 파일
+data/temp/
+*.pkl
+
+# 환경변수
+.env
