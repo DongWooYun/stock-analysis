@@ -28,6 +28,12 @@ jobs:
           DART_API_KEY: ${{ secrets.DART_API_KEY }}
         run: python pipeline.py
 
+      - name: Ping Streamlit (슬립 방지)
+        run: |
+          curl -s -o /dev/null -w "%{http_code}" \
+          https://stock-analysis-dongwooyun.streamlit.app/ || true
+          echo "Streamlit ping 완료"
+
       - name: Commit and push
         run: |
           git config user.email "action@github.com"
