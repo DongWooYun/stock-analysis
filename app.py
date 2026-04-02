@@ -12,10 +12,10 @@ st.set_page_config(
 
 @st.cache_data
 def load_data():
-    df_v2    = pd.read_csv("data/output/gap_v2.csv", dtype={"Code": str, "corp_code": str})
-    df_final = pd.read_csv("data/output/gap_v2_final.csv", dtype={"Code": str, "corp_code": str})
+    df_v2    = pd.read_csv("streamlit_app/data/output/gap_v2.csv", dtype={"Code": str, "corp_code": str})
+    df_final = pd.read_csv("streamlit_app/data/output/gap_v2_final.csv", dtype={"Code": str, "corp_code": str})
     try:
-        df_fin = pd.read_csv("data/output/finance_roe.csv", dtype={"Code": str})
+        df_fin = pd.read_csv("streamlit_app/data/output/finance_roe.csv", dtype={"Code": str})
         df_fin["ROE_pct"] = (df_fin["ROE"] * 100).round(2)
     except:
         df_fin = pd.DataFrame()
@@ -594,9 +594,9 @@ with tab7:
     # ── 데이터 로드 ───────────────────────────────────────
     @st.cache_data
     def load_backtest():
-        bt  = pd.read_csv("data/output/backtest_result.csv", dtype={"Code": str})
-        rf  = pd.read_csv("data/output/rf_feature_importance.csv")
-        shp = pd.read_csv("data/output/shap_importance.csv")
+        bt  = pd.read_csv("streamlit_app/data/output/backtest_result.csv", dtype={"Code": str})
+        rf  = pd.read_csv("streamlit_app/data/output/rf_feature_importance.csv")
+        shp = pd.read_csv("streamlit_app/data/output/shap_importance.csv")
         return bt, rf, shp
 
     try:
