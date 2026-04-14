@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>프로젝트 가이드</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f4f8; color: #1a202c; }
+
+  .hero {
+    background: linear-gradient(135deg, #1F4E79 0%, #2E75B6 100%);
+    color: white; padding: 48px 40px 36px; text-align: center;
+  }
+  .hero h1 { font-size: 2rem; font-weight: 800; margin-bottom: 8px; }
+  .hero p { font-size: 1rem; opacity: 0.85; }
+
+  .tabs {
+    display: flex; background: white; border-bottom: 2px solid #e2e8f0;
+    position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+  .tab {
+    flex: 1; padding: 16px; text-align: center; cursor: pointer;
+    font-weight: 600; font-size: 0.9rem; color: #64748b;
+    border-bottom: 3px solid transparent; transition: all 0.2s;
+  }
+  .tab.active { color: #1F4E79; border-bottom-color: #2E75B6; background: #f8faff; }
+  .tab:hover { color: #2E75B6; background: #f8faff; }
+
+  .panel { display: none; padding: 32px 40px; max-width: 960px; margin: 0 auto; }
+  .panel.active { display: block; }
+
+  /* ── GitHub 구조 ── */
+  .tree {
+    background: #0d1117; color: #e6edf3; border-radius: 12px;
+    padding: 28px 32px; font-family: 'Courier New', monospace; font-size: 0.88rem;
+    line-height: 2; box-shadow: 0 4px 24px rgba(0,0,0,0.15);
+  }
+  .tree .folder { color: #58a6ff; font-weight: 700; }
+  .tree .file { color: #e6edf3; }
+  .tree .comment { color: #8b949e; }
+  .tree .important { color: #ffa657; font-weight: 600; }
+
+  .card {
+    background: white; border-radius: 12px; padding: 24px;
+    margin-bottom: 20px; box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    border-left: 4px solid #2E75B6;
+  }
+  .card h3 { font-size: 1rem; font-weight: 700; color: #1F4E79; margin-bottom: 12px; }
+  .card p, .card li { font-size: 0.88rem; color: #475569; line-height: 1.7; }
+  .card ul { padding-left: 20px; }
+
+  .badge {
+    display: inline-block; padding: 2px 10px; border-radius: 20px;
+    font-size: 0.75rem; font-weight: 700; margin-right: 6px;
+  }
+  .badge.blue { background: #dbeafe; color: #1d4ed8; }
+  .badge.green { background: #dcfce7; color: #15803d; }
+  .badge.orange { background: #ffedd5; color: #c2410c; }
+  .badge.gray { background: #f1f5f9; color: #475569; }
+
+  /* ── 체크리스트 ── */
+  .checklist-section { margin-bottom: 32px; }
+  .checklist-section h2 {
+    font-size: 1.1rem; font-weight: 800; color: #1F4E79;
+    margin-bottom: 16px; padding-bottom: 8px;
+    border-bottom: 2px solid #e2e8f0;
+  }
+  .check-item {
+    display: flex; align-items: flex-start; gap: 12px;
+    background: white; border-radius: 10px; padding: 14px 18px;
+    margin-bottom: 10px; box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+    cursor: pointer; transition: all 0.2s; border: 2px solid transparent;
+  }
+  .check-item:hover { border-color: #2E75B6; }
+  .check-item.done { background: #f0fdf4; border-color: #86efac; }
+  .check-item.done .check-label { text-decoration: line-through; color: #94a3b8; }
+  .checkbox {
+    width: 22px; height: 22px; border-radius: 6px; border: 2px solid #cbd5e1;
+    flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+    font-size: 0.8rem; transition: all 0.2s; margin-top: 1px;
+  }
+  .check-item.done .checkbox { background: #22c55e; border-color: #22c55e; color: white; }
+  .check-label { font-size: 0.88rem; font-weight: 600; color: #1e293b; display: block; }
+  .check-desc { font-size: 0.8rem; color: #64748b; margin-top: 3px; display: block; }
+  .check-code {
+    background: #1e293b; color: #7dd3fc; border-radius: 6px;
+    padding: 2px 8px; font-family: monospace; font-size: 0.78rem; margin-top: 6px;
+    display: inline-block;
+  }
+
+  .time-badge {
+    background: #fef3c7; color: #92400e; border-radius: 20px;
+    padding: 3px 10px; font-size: 0.75rem; font-weight: 700;
+    margin-left: auto; flex-shrink: 0; white-space: nowrap;
+  }
+
+  .progress-bar-wrap {
+    background: #e2e8f0; border-radius: 99px; height: 8px; margin-bottom: 24px;
+  }
+  .progress-bar {
+    height: 8px; border-radius: 99px; background: linear-gradient(90deg, #2E75B6, #22c55e);
+    width: 0%; transition: width 0.4s;
+  }
+  .progress-label { font-size: 0.8rem; color: #64748b; margin-bottom: 6px; }
+
+  .tip {
+    background: #fffbeb; border: 1px solid #fde68a; border-radius: 10px;
+    padding: 14px 18px; margin-bottom: 20px; font-size: 0.85rem; color: #78350f;
+  }
+  .tip strong { color: #92400e; }
+
+  section-title {
+    display: block; font-size: 1.3rem; font-weight: 800;
+    color: #1F4E79; margin-bottom: 20px;
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>📊 KOSPI/KOSDAQ 저평가 종목 분석</h1>
+  <p>GitHub 구조 설계 + PC방 Day 1 세팅 체크리스트</p>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('github')">📁 GitHub 구조</div>
+  <div class="tab" onclick="switchTab('checklist')">✅ Day 1 체크리스트</div>
+</div>
+
+<!-- ══════════════ GitHub 구조 패널 ══════════════ -->
+<div id="github" class="panel active">
+
+  <div class="tip">
+    <strong>💡 설계 원칙:</strong> 단계별로 폴더가 명확히 분리되어 있어서, 코드가 길어져도 어디에 무엇이 있는지 한눈에 보임. README만 잘 써도 포트폴리오 완성도가 크게 올라감.
+  </div>
+
+  <div class="tree">
+<span class="folder">📁 stock-analysis/</span>  <span class="comment">← GitHub 레포 루트</span>
+│
+<span class="important">├── README.md</span>  <span class="comment">← 포트폴리오 핵심. 프로젝트 설명 + 결과 스크린샷</span>
+├── requirements.txt  <span class="comment">← 사용 라이브러리 목록</span>
+│
+<span class="folder">├── 📁 data/</span>  <span class="comment">← 데이터 저장 (Google Drive와 연동)</span>
+│   ├── raw/  <span class="comment">← 수집한 원본 데이터 (KRX, DART)</span>
+│   ├── processed/  <span class="comment">← 정제 완료 데이터</span>
+│   └── output/  <span class="comment">← 최종 랭킹, 괴리율 결과</span>
+│
+<span class="folder">├── 📁 notebooks/</span>  <span class="comment">← Google Colab 파일들 (.ipynb)</span>
+│   ├── <span class="important">01_data_collection.ipynb</span>  <span class="comment">← KRX/DART 데이터 수집</span>
+│   ├── <span class="important">02_data_cleaning.ipynb</span>  <span class="comment">← 결측값 처리, 정제</span>
+│   ├── <span class="important">03_indicators.ipynb</span>  <span class="comment">← PER, 적정주가, 괴리율 계산</span>
+│   ├── <span class="important">04_supply_demand.ipynb</span>  <span class="comment">← 외인/기관 수급 계산</span>
+│   └── <span class="important">05_scoring.ipynb</span>  <span class="comment">← 스코어링 / 랭킹</span>
+│
+<span class="folder">├── 📁 src/</span>  <span class="comment">← 완성된 Python 함수 모음</span>
+│   ├── collect.py  <span class="comment">← 데이터 수집 함수</span>
+│   ├── indicators.py  <span class="comment">← 지표 계산 함수</span>
+│   ├── scoring.py  <span class="comment">← 스코어링 함수</span>
+│   └── utils.py  <span class="comment">← 공통 유틸 함수</span>
+│
+<span class="folder">├── 📁 dashboard/</span>  <span class="comment">← Streamlit 대시보드</span>
+│   └── <span class="important">app.py</span>  <span class="comment">← 메인 대시보드 파일</span>
+│
+<span class="folder">└── 📁 docs/</span>  <span class="comment">← 문서</span>
+    ├── project_definition.docx  <span class="comment">← 프로젝트 정의서</span>
+    └── screenshots/  <span class="comment">← 결과 스크린샷 (README에 첨부)</span>
+  </div>
+
+  <br>
+
+  <div class="card">
+    <h3>📌 작업 흐름</h3>
+    <p>PC방에서 Colab 열기 → 코드 작성 → <strong>notebooks/ 폴더에 저장</strong> → GitHub push</p>
+    <p>→ 기능이 완성되면 <strong>src/ 폴더로 함수 정리</strong> → dashboard/app.py에서 불러와서 사용</p>
+  </div>
+
+  <div class="card">
+    <h3>⭐ README.md 구성 (면접관이 제일 먼저 보는 파일)</h3>
+    <ul>
+      <li>프로젝트 한 줄 설명</li>
+      <li>기획 배경 (수작업 경험 → 자동화 스토리)</li>
+      <li>사용 데이터 소스 + 지표 설명</li>
+      <li>대시보드 스크린샷</li>
+      <li>실행 방법</li>
+      <li>배운 점 / 한계 / 개선 방향</li>
+    </ul>
+  </div>
+
+  <div class="card" style="border-left-color: #f59e0b;">
+    <h3>⚠️ data/ 폴더 주의사항</h3>
+    <p>수집한 데이터 파일(.csv)은 GitHub에 올리지 않아도 됨. <strong>.gitignore에 data/ 추가</strong>하고 Google Drive에만 저장하면 됨. 코드(notebooks, src)만 GitHub에 올리면 포트폴리오로 충분.</p>
+  </div>
+
+</div>
+
+<!-- ══════════════ 체크리스트 패널 ══════════════ -->
+<div id="checklist" class="panel">
+
+  <div class="tip">
+    <strong>🎯 목표:</strong> PC방에서 첫날 이 모든 걸 끝내면 다음 날부터 바로 코드 작성 시작 가능. 예상 소요시간 <strong>약 2~3시간</strong>.
+  </div>
+
+  <div class="progress-label" id="progress-label">진행률: 0 / 0</div>
+  <div class="progress-bar-wrap">
+    <div class="progress-bar" id="progress-bar"></div>
+  </div>
+
+  <!-- SECTION 1 -->
+  <div class="checklist-section">
+    <h2>🔐 1단계 — 계정 준비 (30분)</h2>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox">✓</div>
+      <div>
+        <span class="check-label">Google 계정 로그인</span>
+        <span class="check-desc">Gmail / Google Drive / Colab 모두 이걸로 연결됨. 개인 계정 필수.</span>
+      </div>
+      <div class="time-badge">5분</div>
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox">✓</div>
+      <div>
+        <span class="check-label">GitHub 계정 생성 또는 로그인</span>
+        <span class="check-desc">github.com → 계정 없으면 Sign up. 이메일 인증까지 완료.</span>
+      </div>
+      <div class="time-badge">10분</div>
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox">✓</div>
+      <div>
+        <span class="check-label">GitHub 레포지토리 생성</span>
+        <span class="check-desc">New repository → 이름: stock-analysis → Public → README 체크 → Create</span>
+        <span class="check-code">github.com/new</span>
+      </div>
+      <div class="time-badge">5분</div>
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox">✓</div>
+      <div>
+        <span class="check-label">.gitignore 파일 추가</span>
+        <span class="check-desc">레포에서 Add file → Create new file → 이름: .gitignore → 아래 내용 붙여넣기</span>
+        <span class="check-code">data/ *.csv *.xlsx __pycache__/ .ipynb_checkpoints/</span>
+      </div>
+      <div class="time-badge">5분</div>
+    </div>
+  </div>
+
+  <!-- SECTION 2 -->
+  <div class="checklist-section">
+    <h2>📁 2단계 — Google Drive 세팅 (15분)</h2>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox">✓</div>
+      <div>
+        <span class="check-label">Google Drive에 프로젝트 폴더 생성</span>
+        <span class="check-desc">drive.google.com → 새 폴더 → 이름: stock-analysis</span>
+      </div>
+      <div class="time-badge">3분</div>
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox">✓</div>
+      <div>
+        <span class="check-label">하위 폴더 생성</span>
+        <span class="check-desc">stock-analysis 안에 data/raw, data/processed, data/output 폴더 만들기</span>
+      </div>
+      <div class="time-badge">5분</div>
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox">✓</div>
+      <div>
+        <span class="check-label">프로젝트 정의서 Drive에 업로드</span>
+        <span class="check-desc">오늘 받은 project_definition.docx → stock-analysis/docs/ 폴더에 업로드</span>
+      </div>
+      <div class="time-badge">2분</div>
+    </div>
+  </div>
+
+  <!-- SECTION 3 -->
+  <div class="checklist-section">
+    <h2>🐍 3단계 — Google Colab 세팅 (30분)</h2>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox">✓</div>
+      <div>
+        <span class="check-label">Colab 접속 + 노트북 생성</span>
+        <span class="check-desc">colab.research.google.com → New notebook → 이름: 01_data_collection</span>
+      </div>
+      <div class="time-badge">3분</div>
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox">✓</div>
+      <div>
+        <span class="check-label">Google Drive 연동 테스트</span>
+        <span class="check-desc">첫 셀에 아래 코드 실행 → Drive 접근 허용 클릭</span>
+        <span class="check-code">from google.colab import drive; drive.mount('/content/drive')</span>
+      </div>
+      <div class="time-badge">5분</div>
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox">✓</div>
+      <div>
+        <span class="check-label">필수 라이브러리 설치 테스트</span>
+        <span class="check-desc">아래 코드 실행해서 에러 없으면 OK</span>
+        <span class="check-code">!pip install FinanceDataReader dart-fss pandas</span>
+      </div>
+      <div class="time-badge">5분</div>
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox">✓</div>
+      <div>
+        <span class="check-label">FinanceDataReader 동작 확인</span>
+        <span class="check-desc">삼성전자 현재가 불러오기 테스트. 숫자가 나오면 성공.</span>
+        <span class="check-code">import FinanceDataReader as fdr; print(fdr.DataReader('005930', '2024').tail())</span>
+      </div>
+      <div class="time-badge">5분</div>
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox">✓</div>
+      <div>
+        <span class="check-label">노트북을 Drive에 저장</span>
+        <span class="check-desc">파일 → Drive에 사본 저장 → stock-analysis/notebooks/ 폴더에 저장</span>
+      </div>
+      <div class="time-badge">3분</div>
+    </div>
+  </div>
+
+  <!-- SECTION 4 -->
+  <div class="checklist-section">
+    <h2>🔗 4단계 — GitHub 연동 (45분)</h2>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox">✓</div>
+      <div>
+        <span class="check-label">GitHub Personal Access Token 발급</span>
+        <span class="check-desc">GitHub → Settings → Developer settings → Personal access tokens → Generate new token → repo 체크 → 토큰 복사해서 메모</span>
+      </div>
+      <div class="time-badge">10분</div>
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox">✓</div>
+      <div>
+        <span class="check-label">Colab에서 GitHub 연동 설정</span>
+        <span class="check-desc">아래 코드 실행 (username, token, email 본인 걸로 교체)</span>
+        <span class="check-code">!git config --global user.name "username"<br>!git config --global user.email "email"</span>
+      </div>
+      <div class="time-badge">5분</div>
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox">✓</div>
+      <div>
+        <span class="check-label">레포 클론</span>
+        <span class="check-desc">아래 코드에서 username, repo, token 교체 후 실행</span>
+        <span class="check-code">!git clone https://token@github.com/username/stock-analysis.git</span>
+      </div>
+      <div class="time-badge">5분</div>
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox">✓</div>
+      <div>
+        <span class="check-label">첫 번째 커밋 & 푸시 테스트</span>
+        <span class="check-desc">파일 하나 추가 후 아래 순서로 push 테스트. GitHub에 반영되면 성공.</span>
+        <span class="check-code">!git add . → !git commit -m "init" → !git push</span>
+      </div>
+      <div class="time-badge">10분</div>
+    </div>
+  </div>
+
+  <!-- SECTION 5 -->
+  <div class="checklist-section">
+    <h2>🎯 5단계 — 마무리 확인 (10분)</h2>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox">✓</div>
+      <div>
+        <span class="check-label">GitHub 레포에 폴더 구조 생성</span>
+        <span class="check-desc">notebooks/, src/, dashboard/, docs/, data/ 폴더 구조 레포에 반영 확인</span>
+      </div>
+      <div class="time-badge">5분</div>
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox">✓</div>
+      <div>
+        <span class="check-label">README.md 초안 작성</span>
+        <span class="check-desc">프로젝트 이름 + 한 줄 설명 + 현재 진행 상황만 적어도 충분. 나중에 계속 업데이트.</span>
+      </div>
+      <div class="time-badge">5분</div>
+    </div>
+
+    <div class="check-item" onclick="toggle(this)">
+      <div class="checkbox">✓</div>
+      <div>
+        <span class="check-label">북마크 저장</span>
+        <span class="check-desc">GitHub 레포 / Google Drive / Colab 즐겨찾기 저장. 다음 PC방 방문 때 빠르게 접근.</span>
+      </div>
+      <div class="time-badge">2분</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function switchTab(id) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  event.target.classList.add('active');
+}
+
+function toggle(el) {
+  el.classList.toggle('done');
+  el.querySelector('.checkbox').textContent = el.classList.contains('done') ? '✓' : '';
+  updateProgress();
+}
+
+function updateProgress() {
+  const all = document.querySelectorAll('.check-item');
+  const done = document.querySelectorAll('.check-item.done');
+  const pct = Math.round((done.length / all.length) * 100);
+  document.getElementById('progress-bar').style.width = pct + '%';
+  document.getElementById('progress-label').textContent = `진행률: ${done.length} / ${all.length} (${pct}%)`;
+}
+
+updateProgress();
+</script>
+</body>
+</html>
