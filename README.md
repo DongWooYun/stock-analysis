@@ -30,6 +30,8 @@ to automatically calculate PER-based valuation gaps and screen for undervalued s
 | Data Collection | DART Open API, FinanceDataReader |
 | Data Processing | pandas, numpy |
 | Visualization | Plotly, Streamlit |
+| ML | scikit-learn (Random Forest), SHAP |
+| Automation | GitHub Actions |
 | Deployment | Streamlit Cloud, GitHub |
 | Environment | Google Colab, Google Drive |
 
@@ -43,6 +45,7 @@ to automatically calculate PER-based valuation gaps and screen for undervalued s
 - Quarterly EPS collection → YoY growth rate based on TTM (Trailing Twelve Months)
 
 ### 2. Gap Calculation
+
 ```python
 Market Gap   = (Current PER - Market Median PER) / Market Median PER
 Sector Gap   = (Current PER - Sector Average PER) / Sector Average PER
@@ -77,29 +80,34 @@ adjusted_gap = gap - (gap × yoy_decimal × 0.5)
 ---
 
 ## 📁 Project Structure
-```
 stock-analysis/
 ├── notebooks/
 │   ├── day1_data_collection.ipynb
 │   ├── day2_gap_v1.ipynb
-│   ├── day3_eps_collection.ipynb
+│   ├── day3_eps_yoy.ipynb
 │   ├── day4_gap_v2_screening.ipynb
-│   └── day5_dashboard.ipynb
+│   ├── day5_dashboard.ipynb
+│   ├── day6_backtesting.ipynb
+│   ├── day7_ml_feature_importance.ipynb
+│   └── day8_pipeline.ipynb
 ├── streamlit_app/
-│   ├── app.py
+│   ├── app.py                  # 8-tab dashboard
 │   ├── requirements.txt
 │   └── data/output/
-│       ├── gap_v2.csv
-│       ├── gap_v2_final.csv
-│       └── finance_roe.csv
-├── data/
-│   ├── processed/
-│   └── output/
-├── docs/
-│   ├── troubleshooting_log.md
-│   └── timeline.md
-└── README.md
-```
+│       ├── gap_v2.csv          # Full 136 stocks
+│       ├── gap_v2_final.csv    # Screened 16 stocks
+│       ├── finance_roe.csv
+│       ├── backtest_result.csv
+│       ├── backtest_stats.csv
+│       ├── rf_feature_importance.csv
+│       └── shap_importance.csv
+├── .github/
+│   └── workflows/
+│       └── daily_update.yml    # Auto pipeline (weekdays 09:00 KST)
+├── pipeline.py
+├── README.md
+├── requirements.txt
+└── .gitignore
 
 ---
 
@@ -109,25 +117,35 @@ stock-analysis/
 |------|-------|
 | Analysis Target | 136 stocks |
 | YoY Data Available | 100 stocks |
-| Final Screened | **26 stocks** |
-| Strong Buy Signal | 42 stocks |
-| Data Reference | DART 2024 Annual Financials |
+| Final Screened | **16 stocks** (as of 2026-03-31) |
+| Strong Buy Signal | 43 stocks |
+| Backtesting Base Date | 2025-03-30 |
+| Strong Buy 12M Return | +201.1% |
+| vs KOSPI Alpha | +88.5% |
+| ANOVA p-value | < 0.0001 |
+| Top SHAP Feature | YoY Growth Rate (27.5%) |
+
+---
+
+## 🤖 AI Chatbot (Tab 8)
+- Powered by **Groq API (LLaMA3-70B)** — Free & Public
+- FAQ section (instant answers, no API call)
+- Free-form questions grounded in gap_v2.csv data
+- Example: "삼성전자 왜 강력매수야?" → Data-based AI analysis
 
 ---
 
 ## ⚠️ Disclaimer
 
 This project is for portfolio purposes only and does not constitute investment advice.
-Gap thresholds (±15%, ±30%) are arbitrarily set and require backtesting validation.
+Gap thresholds (±15%, ±30%) are arbitrarily set and require further backtesting validation.
 
 ---
 
 ## 🔜 Roadmap
 
-- [ ] Backtesting (DART disclosure date + 5 business days)
-- [ ] ML feature importance (Random Forest + SHAP)
-- [ ] DART 2025 auto-sync pipeline (daily API check)
-- [ ] Airflow DAG automation (Astronomer.io)
+- [ ] Foreign/institutional buying pressure indicator
+- [ ] Multi-year backtesting (2023~2026)
 - [ ] Cloud DB migration (Snowflake / BigQuery)
 
 ---
@@ -140,7 +158,7 @@ Gap thresholds (±15%, ±30%) are arbitrarily set and require backtesting valida
 
 ---
 
-*Data basis: DART 2024 Annual Financial Statements | YoY based on TTM EPS*
+*Data basis: DART 2024 Annual Financial Statements | YoY based on TTM EPS | Auto-updated every weekday 09:00 KST*
 
 ---
 
@@ -150,6 +168,8 @@ Gap thresholds (±15%, ±30%) are arbitrarily set and require backtesting valida
 
 # 📈 한국 주식 괴리율 기반 저평가 종목 분석 대시보드
 
+---
+
 ## 📌 프로젝트 개요
 
 인하대 글로벌금융학과 재학 중 투자론·증권분석 등 전공 수업에서
@@ -157,12 +177,7 @@ Gap thresholds (±15%, ±30%) are arbitrarily set and require backtesting valida
 데이터 분석 역량을 기르는 과정에서 그 경험이 떠올라,
 Python으로 자동화된 개선 버전을 만들어보고 싶어 착수한 프로젝트입니다.
 
-KOSPI200 + KOSDAQ100 약 300개 종목을 대상으로 DART Open API와 FinanceDataReader를 활용해
-PER 기반 괴리율을 자동 산출하고, YoY 성장률을 반영한 조정괴리율로 저평가 종목을 스크리닝합니다.
-
-## 🚀 배포 주소
-
-👉 **[https://stock-analysis-dongwooyun.streamlit.app/](https://stock-analysis-dongwooyun.streamlit.app/)**
+---
 
 ## 📊 분석 방법론
 
@@ -183,24 +198,43 @@ adjusted_gap = gap - (gap × yoy_decimal × 0.5)
 | YoY 성장률 | > 0% 또는 N/A |
 | 부채비율 | < 200% |
 
+---
+
 ## 📈 주요 결과
 
 | 항목 | 수치 |
 |------|------|
 | 분석 대상 | 136개 |
-| YoY 수집 | 100개 |
-| 최종 저평가 스크리닝 | **26개** |
-| 강력매수 시그널 | 42개 |
+| 최종 저평가 | **16개** (2026-03-31 기준) |
+| 강력매수 시그널 | 43개 |
+| 백테스팅 기준일 | 2025-03-30 |
+| 강력매수 12M 수익률 | +201.1% |
+| vs KOSPI 알파 | +88.5% |
+| ANOVA p값 | < 0.0001 |
+| SHAP 1위 피처 | YoY 성장률 (27.5%) |
+
+---
+
+## 🤖 AI 챗봇 (Tab 8)
+- **Groq API (LLaMA3-70B)** 기반 — 무료 공개
+- FAQ 즉시 답변 섹션
+- gap_v2.csv 데이터 기반 자유 질문
+- 예시: "삼성전자 왜 강력매수야?" → 데이터 기반 AI 분석
+
+---
 
 ## ⚠️ 주의사항
 
 본 프로젝트는 데이터 분석 포트폴리오 목적으로 제작되었습니다.
 분석 결과는 투자 권유가 아니며, 괴리율 기준값은 백테스팅을 통한 검증이 필요합니다.
 
-## 🔜 향후 계획
-- [ ] 백테스팅: DART 공시일 + 5영업일 기준 수익률 검증
-- [ ] ML 피처 중요도 분석 (Random Forest + SHAP)
-- [ ] DART 2025 사업보고서 자동 감지 및 동기화
-- [ ] Airflow DAG 기반 자동화 파이프라인
+---
 
-*데이터 기준: DART 2024 연간 재무제표 | TTM EPS 기준 YoY 성장률*
+## 🔜 향후 계획
+- [ ] 외국인·기관 순매수 지표 추가
+- [ ] 멀티연도 백테스팅 (2023~2026)
+- [ ] 클라우드 DB 전환 (Snowflake / BigQuery)
+
+---
+
+*데이터 기준: DART 2024 연간 재무제표 | TTM EPS 기준 YoY 성장률 | 매 영업일 09:00 자동 갱신*
