@@ -12,10 +12,10 @@ st.set_page_config(
 
 @st.cache_data
 def load_data():
-    df_v2    = pd.read_csv("streamlit_app/data/output/gap_v2.csv", dtype={"Code": str, "corp_code": str})
-    df_final = pd.read_csv("streamlit_app/data/output/gap_v2_final.csv", dtype={"Code": str, "corp_code": str})
+    df_v2    = pd.read_csv("data/output/gap_v2.csv", dtype={"Code": str, "corp_code": str})
+    df_final = pd.read_csv("data/output/gap_v2_final.csv", dtype={"Code": str, "corp_code": str})
     try:
-        df_fin = pd.read_csv("streamlit_app/data/output/finance_roe.csv", dtype={"Code": str})
+        df_fin = pd.read_csv("data/output/finance_roe.csv", dtype={"Code": str})
         df_fin["ROE_pct"] = (df_fin["ROE"] * 100).round(2)
     except:
         df_fin = pd.DataFrame()
@@ -38,8 +38,47 @@ SIGNAL_EMOJI = {
     "강력매수": "🔵", "매수": "🟢", "중립": "⚪", "매도": "🟡", "강력매도": "🔴"
 }
 
+# ── 사이드바 ──────────────────────────────────────
+with st.sidebar:
+    st.markdown("## 📊 한국 주식 괴리율 분석")
+    st.markdown("**KOSPI200 + KOSDAQ100**")
+    st.markdown("---")
+
+    updated_at_side = df_v2["updated_at"].iloc[0] if "updated_at" in df_v2.columns else "N/A"
+    st.markdown(f"📅 **기준일:** {updated_at_side}")
+    st.markdown(f"📈 **분석 대상:** {len(df_v2)}개")
+    st.markdown(f"🎯 **저평가 종목:** {len(df_final)}개")
+    strong_buy = df_v2["signal_v2"].value_counts().get("강력매수", 0)
+    st.markdown(f"🔵 **강력매수:** {strong_buy}개")
+
+    st.markdown("---")
+    st.markdown("### 🔍 종목 빠른 검색")
+    search_name = st.text_input("종목명 입력", placeholder="예: 삼성전자")
+    if search_name:
+        result = df_v2[df_v2["Name"].str.contains(search_name, na=False)]
+        if len(result) > 0:
+            for _, row in result.iterrows():
+                signal = row["signal_v2"]
+                color = {"강력매수": "🔵", "매수": "🟢", "중립": "⚪",
+                         "매도": "🟡", "강력매도": "🔴"}.get(signal, "⚪")
+                st.markdown(f"{color} **{row['Name']}** ({signal})")
+                st.markdown(f"시장괴리율: {row['gap_market_v2']*100:.1f}%")
+        else:
+            st.warning("종목을 찾을 수 없습니다.")
+
+    st.markdown("---")
+    st.markdown("### 📌 바로가기")
+    st.markdown("- 🏆 저평가 스크리닝")
+    st.markdown("- 📊 괴리율 분석")
+    st.markdown("- 🔍 종목 상세")
+    st.markdown("- 🤖 AI 챗봇 (Tab 8)")
+    st.markdown("---")
+    st.caption("⚠️ 본 대시보드는 분석 목적이며 투자 권유가 아닙니다.")
+
 st.title("📈 한국 주식 괴리율 기반 저평가 분석 대시보드")
+updated_at = df_v2["updated_at"].iloc[0] if "updated_at" in df_v2.columns else "N/A"
 st.caption("KOSPI200 + KOSDAQ100 | DART Open API | PER 기반 괴리율 분석 (YoY 성장률 조정)")
+st.info(f"📅 현재가 및 괴리율 기준일: **{updated_at}** | 매 영업일 09:00 자동 갱신")
 
 with st.expander("📖 용어 설명 보기"):
     st.markdown("""
@@ -77,13 +116,13 @@ st.caption("""
 """)
 st.divider()
 
-tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs([
+tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8 = st.tabs([
     "🏆 저평가 스크리닝",
     "📊 괴리율 분석",
     "📈 YoY 성장률",
     "🔍 종목 상세",
     "🏦 금융 섹터",
-    "📋 업데이트 내역", "📉 과거 데이터 분석"
+    "📋 업데이트 내역", "📉 과거 데이터 분석", "🤖 AI 챗봇"
 ])
 
 # ── Tab 1 ─────────────────────────────────────────────
@@ -301,14 +340,6 @@ with tab2:
                                 margin=dict(l=20, r=20, t=40, b=20))
         fig_heat.update_traces(textfont_size=14)
         st.plotly_chart(fig_heat, use_container_width=True)
-        with st.expander("조정 전 분류 기준"):
-            st.markdown("""
-| 조정 전 분류 | 의미 |
-|-------------|------|
-| **고평가** | 현재가 > 적정가 (기본괴리율 양수) |
-| **주의** | 고평가이나 일부 긍정 지표 혼재 |
-| **강력매수/매도** | 괴리율이 극단적으로 큰 종목 |
-""")
 
     # 섹터별 평균 조정괴리율 — 수치 직접 표시
     st.subheader("섹터별 평균 조정괴리율")
@@ -331,6 +362,15 @@ with tab2:
         margin=dict(l=20, r=80, t=40, b=20)
     )
     st.plotly_chart(fig_sec, use_container_width=True)
+
+    with st.expander("📌 조정 전 분류 기준"):
+        st.markdown("""
+| 조정 전 분류 | 의미 |
+|-------------|------|
+| **고평가** | 현재가 > 적정가 (기본괴리율 양수) |
+| **주의** | 고평가이나 일부 긍정 지표 혼재 |
+| **강력매수/매도** | 괴리율이 극단적으로 큰 종목 |
+""")
 
 # ── Tab 3 ─────────────────────────────────────────────
 with tab3:
@@ -516,7 +556,7 @@ with tab5:
 
 # ── Tab 6: 업데이트 내역 ──────────────────────────────
 with tab6:
-    st.subheader("📋 업데이트 내역", "📉 과거 데이터 분석")
+    st.subheader("📋 업데이트 내역", "📉 과거 데이터 분석", "🤖 AI 챗봇")
 
     st.markdown("""
 ### v1.0 — 2026.03.28
@@ -588,15 +628,15 @@ st.divider()
 st.caption("📌 데이터 기준: DART 2024 연간 재무제표 | TTM(최근 12개월) EPS 기준 YoY 성장률 | 분석 목적용, 투자 권유 아님")
 
 with tab7:
-    st.subheader("📉 과거 데이터 분석")
+    st.subheader("📉 과거 데이터 분석", "🤖 AI 챗봇")
     st.caption("기준일: 2025-03-30 | 2024 연간 재무제표 기준 | 분석 목적용, 투자 권유 아님")
 
     # ── 데이터 로드 ───────────────────────────────────────
     @st.cache_data
     def load_backtest():
-        bt  = pd.read_csv("streamlit_app/data/output/backtest_result.csv", dtype={"Code": str})
-        rf  = pd.read_csv("streamlit_app/data/output/rf_feature_importance.csv")
-        shp = pd.read_csv("streamlit_app/data/output/shap_importance.csv")
+        bt  = pd.read_csv("data/output/backtest_result.csv", dtype={"Code": str})
+        rf  = pd.read_csv("data/output/rf_feature_importance.csv")
+        shp = pd.read_csv("data/output/shap_importance.csv")
         return bt, rf, shp
 
     try:
@@ -814,3 +854,184 @@ with tab7:
 - ML 모델 CV R² = -0.131 → 수익률 예측보다 피처 중요도 해석 목적
 - 본 분석은 포트폴리오 목적이며 투자 권유가 아님
 """)
+
+with tab8:
+    st.subheader("🤖 AI 종목 분석 챗봇")
+    st.caption("KOSPI200 + KOSDAQ100 괴리율 데이터 기반 | Groq AI (LLaMA3) | 무료 공개")
+
+    # ── Groq API 설정 ─────────────────────────────────
+    import requests as req
+
+    GROQ_API_KEY = st.secrets.get("GROQ_API_KEY", "")
+
+    if not GROQ_API_KEY:
+        st.warning("⚠️ Groq API 키가 설정되지 않았습니다. Streamlit Secrets에 GROQ_API_KEY를 추가해주세요.")
+        st.stop()
+
+    # ── 데이터 컨텍스트 준비 ──────────────────────────
+    def get_stock_context(query: str) -> str:
+        """쿼리에서 종목명 추출 후 데이터 컨텍스트 생성"""
+        context_rows = []
+
+        # 종목명 매칭
+        for _, row in df_v2.iterrows():
+            if row["Name"] in query:
+                context_rows.append(row)
+                break
+
+        # 종목명 없으면 강력매수 상위 5개
+        if not context_rows:
+            top5 = df_v2[df_v2["signal_v2"] == "강력매수"].head(5)
+            for _, row in top5.iterrows():
+                context_rows.append(row)
+
+        context = f"""
+현재 분석 데이터 (기준일: {df_v2["updated_at"].iloc[0] if "updated_at" in df_v2.columns else "N/A"}):
+- 분석 대상: {len(df_v2)}개 종목 (KOSPI200 + KOSDAQ100)
+- 저평가 종목: {len(df_final)}개
+- 시그널 분포: {df_v2["signal_v2"].value_counts().to_dict()}
+
+관련 종목 상세:
+"""
+        for row in context_rows:
+            context += f"""
+종목명: {row["Name"]} ({row.get("Sector", "N/A")})
+- 시그널: {row["signal_v2"]}
+- 시장 조정괴리율: {row["gap_market_v2"]*100:.1f}%
+- 섹터 조정괴리율: {row["gap_sector_v2"]*100:.1f}%
+- PER: {row["PER"]:.1f}
+- YoY 성장률: {f"{row['yoy_growth_pct']:.1f}%" if pd.notna(row.get("yoy_growth_pct")) else "N/A"}
+- 부채비율: {f"{row['debt_ratio']:.1f}%" if pd.notna(row.get("debt_ratio")) else "N/A"}
+- 현재가: {f"{int(row['price']):,}원" if pd.notna(row.get("price")) else "N/A"}
+"""
+        return context
+
+    def ask_groq(question: str, context: str) -> str:
+        """Groq API 호출"""
+        system_prompt = """당신은 한국 주식 시장 전문 AI 분석가입니다.
+PER 기반 괴리율 분석 데이터를 바탕으로 종목을 분석합니다.
+항상 한국어로 답변하고, 데이터 기반으로 설명합니다.
+마지막에 반드시 "본 분석은 투자 권유가 아니며 참고용입니다." 라고 명시합니다."""
+
+        messages = [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": f"{context}\n\n질문: {question}"}
+        ]
+
+        try:
+            response = req.post(
+                "https://api.groq.com/openai/v1/chat/completions",
+                headers={
+                    "Authorization": f"Bearer {GROQ_API_KEY}",
+                    "Content-Type": "application/json"
+                },
+                json={
+                    "model": "llama3-70b-8192",
+                    "messages": messages,
+                    "max_tokens": 1024,
+                    "temperature": 0.3
+                },
+                timeout=30
+            )
+            return response.json()["choices"][0]["message"]["content"]
+        except Exception as e:
+            return f"오류가 발생했습니다: {str(e)}"
+
+    # ── FAQ 섹션 ──────────────────────────────────────
+    st.markdown("### 📌 자주 묻는 질문")
+    st.caption("버튼 클릭 시 즉시 답변 (API 호출 없음)")
+
+    FAQ = {
+        "괴리율이 뭔가요?": """**괴리율**은 현재 주가가 적정주가 대비 얼마나 차이나는지를 나타냅니다.
+
+- **음수(-)**: 현재가 < 적정가 → **저평가** (매수 신호)
+- **양수(+)**: 현재가 > 적정가 → **고평가** (매도 신호)
+
+계산 공식:
+괴리율 = (현재 PER - 시장 중앙값 PER) / 시장 중앙값 PER
+
+        "강력매수 기준이 뭔가요?": """시장 조정괴리율과 섹터 조정괴리율의 **평균이 -30% 이하**인 종목입니다.
+
+| 시그널 | 기준 |
+|--------|------|
+| 🔵 강력매수 | 평균 ≤ -30% |
+| 🟢 매수 | 평균 ≤ -15% |
+| ⚪ 중립 | -15% ~ +15% |
+| 🟡 매도 | 평균 ≥ +15% |
+| 🔴 강력매도 | 평균 ≥ +30% |""",
+
+        "데이터는 언제 업데이트되나요?": """매 **평일 오전 9시**에 자동으로 업데이트됩니다.
+
+- 현재가: FinanceDataReader (실시간 수집)
+- EPS/재무제표: DART Open API (연간 업데이트)
+- GitHub Actions로 자동화 파이프라인 구축""",
+
+        "백테스팅 결과는 어떻게 되나요?": f"""2025-03-30 기준 백테스팅 결과입니다.
+
+| 시그널 | 12개월 수익률 |
+|--------|-------------|
+| 🔵 강력매수 | +201.1% |
+| 🟢 매수 | +114.7% |
+| ⚪ 중립 | +121.6% |
+| 🟡 매도 | +78.3% |
+| 🔴 강력매도 | +67.0% |
+
+KOSPI 대비 알파: **+88.5%**
+※ 2025~2026년 대세 상승장(KOSPI +112%) 감안 필요""",
+
+        "이 대시보드로 투자해도 되나요?": """**본 대시보드는 투자 권유가 아닙니다.**
+
+- PER 기반 단순 모델로 모든 요소를 반영하지 않습니다
+- 백테스팅은 단일 연도(대세 상승장) 기준으로 검증됐습니다
+- 실제 투자 전 전문가 상담 및 본인의 판단이 필요합니다
+- 포트폴리오 분석 목적으로만 활용하세요""",
+    }
+
+    faq_cols = st.columns(3)
+    faq_keys = list(FAQ.keys())
+    for i, key in enumerate(faq_keys):
+        with faq_cols[i % 3]:
+            if st.button(key, key=f"faq_{i}", use_container_width=True):
+                st.session_state["faq_answer"] = FAQ[key]
+                st.session_state["faq_question"] = key
+
+    if "faq_answer" in st.session_state:
+        st.markdown(f"**Q. {st.session_state['faq_question']}**")
+        st.markdown(st.session_state["faq_answer"])
+
+    st.divider()
+
+    # ── 자유 질문 ─────────────────────────────────────
+    st.markdown("### 💬 AI 자유 질문")
+    st.caption("종목명 포함 시 해당 종목 데이터 기반으로 답변합니다")
+
+    # 대화 히스토리
+    if "chat_history" not in st.session_state:
+        st.session_state["chat_history"] = []
+
+    # 이전 대화 표시
+    for chat in st.session_state["chat_history"]:
+        with st.chat_message(chat["role"]):
+            st.markdown(chat["content"])
+
+    # 질문 입력
+    if prompt := st.chat_input("예: 삼성전자 왜 강력매수야? / 저평가 종목 추천해줘"):
+        # 사용자 메시지
+        st.session_state["chat_history"].append({"role": "user", "content": prompt})
+        with st.chat_message("user"):
+            st.markdown(prompt)
+
+        # AI 답변
+        with st.chat_message("assistant"):
+            with st.spinner("분석 중..."):
+                context = get_stock_context(prompt)
+                answer  = ask_groq(prompt, context)
+            st.markdown(answer)
+            st.session_state["chat_history"].append(
+                {"role": "assistant", "content": answer}
+            )
+
+    # 대화 초기화
+    if st.button("🗑️ 대화 초기화"):
+        st.session_state["chat_history"] = []
+        st.rerun()
