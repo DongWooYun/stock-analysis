@@ -11,7 +11,7 @@ st.set_page_config(
     layout="wide"
 )
 
-@st.cache_data
+@st.cache_data(ttl=3600)
 def load_data():
     df_v2    = pd.read_csv("data/output/gap_v2.csv", dtype={"Code": str, "corp_code": str})
     df_final = pd.read_csv("data/output/gap_v2_final.csv", dtype={"Code": str, "corp_code": str})
