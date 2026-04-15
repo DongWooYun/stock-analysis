@@ -942,8 +942,7 @@ PER 기반 괴리율 분석 데이터를 바탕으로 종목을 분석합니다.
     st.markdown("### 📌 자주 묻는 질문")
     st.caption("버튼 클릭 시 즉시 답변 (API 호출 없음)")
 
-
-        faq_cols = st.columns(3)
+    faq_cols = st.columns(3)
     faq_keys = list(FAQ.keys())
     for i, key in enumerate(faq_keys):
         with faq_cols[i % 3]:
