@@ -210,7 +210,7 @@ if page == "🏆 저평가 스크리닝":
     df_show = df_filtered[cols_sel].copy()
     df_show.columns = ["종목명", "섹터", "시장 조정괴리율", "섹터 조정괴리율",
                        "YoY성장률(%)", "부채비율(%)", "PER", "현재가", "시그널"]
-    df_show["PER"]            = df_show["PER"].round(1)
+    df_show["PER"]            = df_show["PER"].apply(lambda x: f"{x:.1f}" if pd.notna(x) else "N/A")
     df_show["시장 조정괴리율"] = (df_filtered["gap_market_v2"] * 100).round(1).astype(str) + "%"
     df_show["섹터 조정괴리율"] = (df_filtered["gap_sector_v2"] * 100).round(1).astype(str) + "%"
     df_show["YoY성장률(%)"]   = df_filtered["yoy_growth_pct"].apply(lambda x: f"{x:.1f}%" if pd.notna(x) else "N/A")

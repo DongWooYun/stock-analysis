@@ -106,5 +106,13 @@ def run_pipeline():
 
     print(f"파이프라인 완료! 저평가: {len(df_final)}개")
 
+    # 루트 data/output 동기화 (Streamlit Cloud는 루트 app.py 기준으로 읽음)
+    import shutil, os
+    src = f'{APP_PATH}/data/output'
+    dst = f'{BASE_PATH}/data/output'
+    for fname in os.listdir(src):
+        shutil.copy2(f'{src}/{fname}', f'{dst}/{fname}')
+    print("루트 data/output 동기화 완료!")
+
 if __name__ == '__main__':
     run_pipeline()
