@@ -68,11 +68,16 @@ with st.sidebar:
             st.warning("종목을 찾을 수 없습니다.")
 
     st.markdown("---")
-    st.markdown("### 📌 바로가기")
-    st.markdown("- 🏆 저평가 스크리닝")
-    st.markdown("- 📊 괴리율 분석")
-    st.markdown("- 🔍 종목 상세")
-    st.markdown("- 🤖 AI 챗봇 (Tab 8)")
+    page = st.radio("페이지 선택", [
+        "🏆 저평가 스크리닝",
+        "📊 괴리율 분석",
+        "📈 YoY 성장률",
+        "🔍 종목 상세",
+        "🏦 금융 섹터",
+        "📋 업데이트 내역",
+        "📉 과거 데이터 분석",
+        "🤖 AI 챗봇",
+    ])
     st.markdown("---")
     st.caption("⚠️ 본 대시보드는 분석 목적이며 투자 권유가 아닙니다.")
 
@@ -117,17 +122,10 @@ st.caption("""
 """)
 st.divider()
 
-tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8 = st.tabs([
-    "🏆 저평가 스크리닝",
-    "📊 괴리율 분석",
-    "📈 YoY 성장률",
-    "🔍 종목 상세",
-    "🏦 금융 섹터",
-    "📋 업데이트 내역", "📉 과거 데이터 분석", "🤖 AI 챗봇"
-])
+
 
 # ── Tab 1 ─────────────────────────────────────────────
-with tab1:
+if page == "🏆 저평가 스크리닝":
     st.subheader("최종 스크리닝 결과")
     st.caption("조건: 시장·섹터 조정괴리율 모두 -15% 이하 | YoY > 0 or 데이터 없음 | 부채비율 200% 이하")
 
@@ -278,7 +276,7 @@ with tab1:
     st.plotly_chart(fig_bubble, use_container_width=True)
 
 # ── Tab 2 ─────────────────────────────────────────────
-with tab2:
+if page == "📊 괴리율 분석":
     st.subheader("기본괴리율 vs 조정괴리율 비교 — 전체 136개")
     st.caption("기본괴리율: 연간 EPS 기준 | 조정괴리율: YoY 성장률 반영 (고평가 구간만 완화)")
 
@@ -374,7 +372,7 @@ with tab2:
 """)
 
 # ── Tab 3 ─────────────────────────────────────────────
-with tab3:
+if page == "📈 YoY 성장률":
     st.subheader("YoY 성장률 분포")
     df_yoy = df_v2.dropna(subset=["yoy_growth_pct"]).copy()
     df_yoy["yoy_capped"] = df_yoy["yoy_growth_pct"].clip(-200, 500)
@@ -412,7 +410,7 @@ with tab3:
     st.plotly_chart(fig_scatter, use_container_width=True)
 
 # ── Tab 4 ─────────────────────────────────────────────
-with tab4:
+if page == "🔍 종목 상세":
     st.subheader("종목 상세 조회")
     st.markdown("**📌 종목 선택**")
     selected = st.selectbox(
@@ -516,7 +514,7 @@ with tab4:
         )
 
 # ── Tab 5 ─────────────────────────────────────────────
-with tab5:
+if page == "🏦 금융 섹터":
     st.subheader("금융 섹터 — ROE 기반 분석")
     st.caption("금융주(은행·증권·보험)는 PER 기반 분석이 부적합하여 ROE 지표로 별도 분석합니다.")
 
@@ -556,7 +554,7 @@ with tab5:
         st.plotly_chart(fig_roe, use_container_width=True)
 
 # ── Tab 6: 업데이트 내역 ──────────────────────────────
-with tab6:
+if page == "📋 업데이트 내역":
     st.subheader("📋 업데이트 내역")
 
     st.markdown("""
@@ -628,7 +626,7 @@ with tab6:
 st.divider()
 st.caption("📌 데이터 기준: DART 2024 연간 재무제표 | TTM(최근 12개월) EPS 기준 YoY 성장률 | 분석 목적용, 투자 권유 아님")
 
-with tab7:
+if page == "📉 과거 데이터 분석":
     st.subheader("📉 과거 데이터 분석", "🤖 AI 챗봇")
     st.caption("기준일: 2025-03-30 | 2024 연간 재무제표 기준 | 분석 목적용, 투자 권유 아님")
 
@@ -856,7 +854,7 @@ with tab7:
 - 본 분석은 포트폴리오 목적이며 투자 권유가 아님
 """)
 
-with tab8:
+if page == "🤖 AI 챗봇":
     st.subheader("🤖 AI 종목 분석 챗봇")
     st.caption("KOSPI200 + KOSDAQ100 괴리율 데이터 기반 | Groq AI (LLaMA3) | 무료 공개")
 
