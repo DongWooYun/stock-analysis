@@ -907,7 +907,7 @@ PER 기반 괴리율 분석 데이터를 바탕으로 종목을 분석합니다.
                     "Content-Type": "application/json"
                 },
                 json={
-                    "model": "llama3-70b-8192",
+                    "model": "llama-3.3-70b-versatile",
                     "messages": messages,
                     "max_tokens": 1024,
                     "temperature": 0.3
