@@ -1,6 +1,7 @@
 # 📈 Korean Stock Undervaluation Analysis Dashboard
 
 [![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://stock-analysis-dongwooyun.streamlit.app/)
+[![Daily Stock Update](https://github.com/DongWooYun/stock-analysis/actions/workflows/daily_update.yml/badge.svg?branch=main)](https://github.com/DongWooYun/stock-analysis/actions/workflows/daily_update.yml)
 ![Python](https://img.shields.io/badge/Python-3.10+-blue)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
@@ -80,6 +81,8 @@ adjusted_gap = gap - (gap × yoy_decimal × 0.5)
 ---
 
 ## 📁 Project Structure
+
+```
 stock-analysis/
 ├── notebooks/
 │   ├── day1_data_collection.ipynb
@@ -103,11 +106,14 @@ stock-analysis/
 │       └── shap_importance.csv
 ├── .github/
 │   └── workflows/
-│       └── daily_update.yml    # Auto pipeline (weekdays 09:00 KST)
+│       └── daily_update.yml    # Auto pipeline (weekdays 09:00 KST) + Streamlit wake (every 6h)
 ├── pipeline.py
+├── wake_app.py                 # Keeps Streamlit apps from sleeping
+├── CHANGELOG.md
 ├── README.md
 ├── requirements.txt
 └── .gitignore
+```
 
 ---
 
@@ -147,6 +153,12 @@ Gap thresholds (±15%, ±30%) are arbitrarily set and require further backtestin
 - [ ] Foreign/institutional buying pressure indicator
 - [ ] Multi-year backtesting (2023~2026)
 - [ ] Cloud DB migration (Snowflake / BigQuery)
+
+---
+
+## 📝 Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) for update history.
 
 ---
 
