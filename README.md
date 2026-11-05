@@ -84,31 +84,36 @@ adjusted_gap = gap - (gap × yoy_decimal × 0.5)
 
 ```
 stock-analysis/
+├── .github/
+│   └── workflows/
+│       └── daily_update.yml    # Pipeline (weekdays 09:00 KST) + Streamlit wake (every 6h)
 ├── notebooks/
 │   ├── day1_data_collection.ipynb
 │   ├── day2_gap_v1.ipynb
 │   ├── day3_eps_yoy.ipynb
-│   ├── day4_gap_v2_screening.ipynb
+│   ├── day4_screening.ipynb
 │   ├── day5_dashboard.ipynb
 │   ├── day6_backtesting.ipynb
 │   ├── day7_ml_feature_importance.ipynb
 │   └── day8_pipeline.ipynb
+├── data/
+│   ├── raw/                    # Stock list (KOSPI200 + KOSDAQ100)
+│   ├── processed/              # Cleaned / intermediate financial data
+│   └── output/                 # Final results: gap_v2.csv, gap_v2_final.csv, backtest, SHAP, etc.
 ├── streamlit_app/
 │   ├── app.py                  # 8-tab dashboard
+│   ├── faq_data.py
 │   ├── requirements.txt
-│   └── data/output/
-│       ├── gap_v2.csv          # Full 136 stocks
-│       ├── gap_v2_final.csv    # Screened 16 stocks
-│       ├── finance_roe.csv
-│       ├── backtest_result.csv
-│       ├── backtest_stats.csv
-│       ├── rf_feature_importance.csv
-│       └── shap_importance.csv
-├── .github/
-│   └── workflows/
-│       └── daily_update.yml    # Auto pipeline (weekdays 09:00 KST) + Streamlit wake (every 6h)
-├── pipeline.py
+│   └── data/output/            # Data read by the app (synced by pipeline.py)
+├── docs/
+│   ├── timeline.md             # Project timeline
+│   └── screenshots/
+├── app.py                      # Streamlit Cloud entry point (root)
+├── faq_data.py                 # FAQ answers for the AI chatbot
+├── pipeline.py                 # Automated data pipeline
 ├── wake_app.py                 # Keeps Streamlit apps from sleeping
+├── project_definition.docx
+├── project_guide.html
 ├── CHANGELOG.md
 ├── README.md
 ├── requirements.txt
